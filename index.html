@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ServiceCap - Home Services Cost Transparency</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8f9fa; color: #333; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    h1 { font-size: 28px; margin-bottom: 5px; }
+    .subtitle { color: #666; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card h2 { font-size: 18px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: 500; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; font-family: inherit; }
+    textarea { min-height: 80px; resize: vertical; }
+    button { background: #ff6b35; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    button:hover { background: #e55a1f; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 15px; }
+    .stat { background: #fff5f0; padding: 15px; border-radius: 4px; text-align: center; }
+    .stat-value { font-size: 20px; font-weight: bold; color: #ff6b35; }
+    .stat-label { font-size: 12px; color: #666; margin-top: 5px; }
+    .quotes-list { margin-top: 15px; max-height: 500px; overflow-y: auto; }
+    .quote-item { background: #f9f9f9; padding: 12px; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid #ff6b35; }
+    .quote-amount { font-weight: 600; font-size: 16px; color: #ff6b35; }
+    .quote-details { font-size: 12px; color: #666; margin-top: 5px; }
+    .jobs-list { margin-top: 15px; max-height: 400px; overflow-y: auto; }
+    .job-item { background: #f9f9f9; padding: 12px; border-radius: 4px; margin-bottom: 10px; cursor: pointer; border: 1px solid #e0e0e0; }
+    .job-item:hover { background: #f0f0f0; }
+    .job-title { font-weight: 600; }
+    .job-meta { font-size: 12px; color: #666; margin-top: 3px; }
+    .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+    .tab-btn { padding: 10px 20px; background: #f0f0f0; border: none; border-radius: 4px; cursor: pointer; }
+    .tab-btn.active { background: #ff6b35; color: white; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>ServiceCap</h1>
+      <p class="subtitle">Compare home service quotes. Know fair pricing.</p>
+    </header>
+
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="showTab('post')">Post a Job</button>
+      <button class="tab-btn" onclick="showTab('browse')">Browse Jobs</button>
+      <button class="tab-btn" onclick="showTab('quote')">Submit Quote</button>
+    </div>
+
+    <div id="postTab" class="tab-content">
+      <div class="grid">
+        <div class="card">
+          <h2>Describe Your Project</h2>
+          <form id="jobForm">
+            <div class="form-group">
+              <label>Service Type</label>
+              <select id="serviceType" required>
+                <option value="">Select service</option>
+                <option value="roofing">Roofing</option>
+                <option value="plumbing">Plumbing</option>
+                <option value="electrical">Electrical</option>
+                <option value="hvac">HVAC</option>
+                <option value="painting">Painting</option>
+                <option value="landscaping">Landscaping</option>
+                <option value="flooring">Flooring</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="description" placeholder="Describe your project in detail..." required></textarea>
+            </div>
+            <div class="form-group">
+              <label>Square Feet (if applicable)</label>
+              <input type="number" id="squareFeet" placeholder="e.g., 2000">
+            </div>
+            <div class="form-group">
+              <label>Location (City, State)</label>
+              <input type="text" id="location" placeholder="e.g., San Francisco, CA" required>
+            </div>
+            <div class="form-group">
+              <label>Urgency</label>
+              <select id="urgency" required>
+                <option value="low">Low - Can wait</option>
+                <option value="medium">Medium - Within 1-2 months</option>
+                <option value="high">High - Within 1-2 weeks</option>
+              </select>
+            </div>
+            <button type="submit">Post Job</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div id="browseTab" class="tab-content" style="display:none;">
+      <div class="card">
+        <h2>Recent Jobs</h2>
+        <div id="jobsList" class="jobs-list"></div>
+      </div>
+    </div>
+
+    <div id="quoteTab" class="tab-content" style="display:none;">
+      <div class="grid">
+        <div class="card">
+          <h2>Submit a Quote</h2>
+          <form id="quoteForm">
+            <div class="form-group">
+              <label>Select Job</label>
+              <select id="quoteJobId" required>
+                <option value="">Loading jobs...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Your Company Name</label>
+              <input type="text" id="contractorName" placeholder="Company name" required>
+            </div>
+            <div class="form-group">
+              <label>Quote Amount ($)</label>
+              <input type="number" id="quoteAmount" placeholder="e.g., 5000" min="1" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label>Estimated Days to Complete</label>
+              <input type="number" id="estimatedDays" placeholder="e.g., 7" min="1" required>
+            </div>
+            <div class="form-group">
+              <label>Notes</label>
+              <textarea id="quoteNotes" placeholder="Any additional details..." style="min-height: 80px;"></textarea>
+            </div>
+            <button type="submit">Submit Quote</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Job Details & Quotes</h2>
+          <div id="jobDetail" style="display:none;">
+            <h3 id="jobTitle" style="margin-bottom: 15px;"></h3>
+            <div id="jobStats" class="stats"></div>
+            <div id="quotesList" class="quotes-list"></div>
+          </div>
+          <div id="noJobSelected" style="text-align: center; color: #999; padding: 40px 20px;">
+            Select a job to see details and quotes
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:3002';
+
+    function showTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.getElementById(tab + 'Tab').style.display = 'block';
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (tab === 'browse') {
+        loadJobs('browse');
+      } else if (tab === 'quote') {
+        loadJobs('quote');
+      }
+    }
+
+    document.getElementById('jobForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        serviceType: document.getElementById('serviceType').value,
+        description: document.getElementById('description').value,
+        squareFeet: document.getElementById('squareFeet').value,
+        location: document.getElementById('location').value,
+        urgency: document.getElementById('urgency').value
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/api/jobs`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        alert('Job posted! ID: ' + data.jobId);
+        document.getElementById('jobForm').reset();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+
+    document.getElementById('quoteForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        jobId: document.getElementById('quoteJobId').value,
+        contractorName: document.getElementById('contractorName').value,
+        amount: document.getElementById('quoteAmount').value,
+        estimatedDays: document.getElementById('estimatedDays').value,
+        notes: document.getElementById('quoteNotes').value
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/api/quotes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        alert('Quote submitted!');
+        document.getElementById('quoteForm').reset();
+        loadJobDetail(document.getElementById('quoteJobId').value);
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+
+    async function loadJobs(tab) {
+      try {
+        const res = await fetch(`${API_URL}/api/jobs`);
+        const data = await res.json();
+
+        if (tab === 'browse') {
+          const list = document.getElementById('jobsList');
+          list.innerHTML = data.jobs.map(j => `
+            <div class="job-item">
+              <div class="job-title">${j.serviceType.toUpperCase()} - ${j.location}</div>
+              <div class="job-meta">${j.description.substring(0, 80)}...</div>
+              <div class="job-meta">${j.quotes.length} quotes · Created ${new Date(j.createdAt).toLocaleDateString()}</div>
+            </div>
+          `).join('');
+        } else if (tab === 'quote') {
+          const select = document.getElementById('quoteJobId');
+          select.innerHTML = '<option value="">Select a job</option>' + data.jobs.map(j => `
+            <option value="${j.id}">${j.serviceType} - ${j.location}</option>
+          `).join('');
+
+          select.addEventListener('change', (e) => {
+            if (e.target.value) {
+              loadJobDetail(e.target.value);
+            }
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadJobDetail(jobId) {
+      try {
+        const res = await fetch(`${API_URL}/api/jobs/${jobId}`);
+        const data = await res.json();
+
+        document.getElementById('noJobSelected').style.display = 'none';
+        document.getElementById('jobDetail').style.display = 'block';
+
+        document.getElementById('jobTitle').textContent = `${data.job.serviceType} - ${data.job.location}`;
+
+        if (data.stats) {
+          document.getElementById('jobStats').innerHTML = `
+            <div class="stat">
+              <div class="stat-value">$${Math.round(data.stats.median)}</div>
+              <div class="stat-label">Median</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">$${Math.round(data.stats.min)}</div>
+              <div class="stat-label">Low</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">$${Math.round(data.stats.max)}</div>
+              <div class="stat-label">High</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">${data.stats.count}</div>
+              <div class="stat-label">Quotes</div>
+            </div>
+          `;
+        }
+
+        document.getElementById('quotesList').innerHTML = data.job.quotes.map(q => `
+          <div class="quote-item">
+            <div class="quote-amount">$${q.amount.toLocaleString()}</div>
+            <div class="quote-details"><strong>${q.contractorName}</strong> · ${q.estimatedDays} days</div>
+            <div class="quote-details">${q.notes}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
