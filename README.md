@@ -1,30 +1,39 @@
 # ServiceCap
 
-Home services cost transparency. Post a project, get quotes from contractors, see market pricing.
+A quote board for home repair and improvement jobs. Homeowners post a job, contractors add quotes, and each job shows the median, low, and high price across its quotes.
 
 ## Features
 
-- Post home service jobs (roofing, plumbing, electrical, HVAC, etc.)
-- Contractors submit quotes for jobs
-- View quote statistics: median, min, max
-- Compare pricing across contractors
-- Transparent project details and quote history
+- Post a job with service type (roofing, plumbing, electrical, HVAC, painting, landscaping, flooring), description, square footage, location, and urgency
+- Browse posted jobs with their quote counts
+- Submit a quote for a job with company name, amount, estimated days, and notes
+- Each job shows median, lowest, and highest quote and the number of quotes
+- Entries are saved to a local JSON file
 
-## Quick Start
+## Getting started
+
+Requires Node.js.
 
 ```bash
 npm install
 npm start
 ```
 
-Open `index.html` in your browser. API runs on `http://localhost:3002`.
+Then open http://localhost:3002. `npm run dev` runs the same command.
 
-## API
+## How it works
 
-- `POST /api/jobs` - Post a new job
-- `GET /api/jobs` - Get all jobs
-- `GET /api/jobs/:id` - Get job with quotes and stats
-- `POST /api/quotes` - Submit a quote for a job
+- `index.html` has three tabs: Post a Job, Browse Jobs, and Submit Quote. It calls the API at `http://localhost:3002`.
+- `server.js` is an Express app that serves the page and exposes:
+  - `POST /api/jobs` and `GET /api/jobs` to create and list jobs.
+  - `GET /api/jobs/:id` to return a job, its quotes, and quote stats.
+  - `POST /api/quotes` to add a quote to a job.
+  - `GET /api/services` to list the service types that have jobs.
+- Data is written to `data.json`, created on first run and ignored by git. `utils.js` holds helpers not yet wired in.
+
+## Status
+
+Prototype. No accounts, so anyone can post jobs or quotes, and there is no contractor verification or messaging.
 
 ## License
 
