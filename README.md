@@ -25,3 +25,7 @@ Open `index.html` in your browser. API runs on `http://localhost:3002`.
 - `GET /api/jobs` - Get all jobs
 - `GET /api/jobs/:id` - Get job with quotes and stats
 - `POST /api/quotes` - Submit a quote for a job
+
+## License
+
+MIT, see [LICENSE](LICENSE).
